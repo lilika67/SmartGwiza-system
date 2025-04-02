@@ -856,7 +856,7 @@ export default function Home() {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-16">
               <div className="relative mb-6">
-                <h2 className="text-3xl md:text-5xl font-bold text-green-900 dark:text-green-400 relative z-10">
+                <h2 className="text-3xl md:text-5xl font-bold text-green-900 dark:text-green-800 relative z-10">
                   Upload Training Data
                 </h2>
                 <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
@@ -873,7 +873,7 @@ export default function Home() {
                 <div
                   className={`border-2 border-dashed rounded-xl ${
                     isDragging
-                      ? "border-green-500 bg-green-50 dark:bg-green-900/30"
+                      ? "border-green-900 bg-green-50 dark:bg-green-900/30"
                       : "border-green-200 dark:border-green-800"
                   } ${error ? "border-red-300 dark:border-red-800" : ""} transition-colors duration-200`}
                   onDragOver={handleDragOver}
@@ -918,7 +918,7 @@ export default function Home() {
                       </div>
                     ) : (
                       <div>
-                        <h3 className="text-xl font-medium text-green-900 dark:text-green-300 mb-2">
+                        <h3 className="text-xl font-medium text-green-900  mb-2">
                           Drag & Drop Your CSV File
                         </h3>
                         <p className="text-amber-700 dark:text-amber-300 mb-6">or click to browse from your computer</p>
@@ -926,11 +926,11 @@ export default function Home() {
                         <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg text-sm text-green-800 dark:text-green-300 mb-6 max-w-md mx-auto">
                           <p className="font-medium mb-2">Your CSV should include:</p>
                           <ul className="list-disc list-inside mt-1 space-y-2 text-left">
-                            <li>Crop type and variety</li>
-                            <li>Planting and harvest dates</li>
+                            <li>Crop type</li>
+                            <li>Area</li>
                             <li>Yield data (kg/ha)</li>
                             <li>Weather conditions</li>
-                            <li>Soil parameters (optional)</li>
+                            
                           </ul>
                         </div>
 
@@ -972,8 +972,8 @@ export default function Home() {
                     disabled={!file || isUploading}
                     className={`w-full py-4 px-6 rounded-full font-medium text-white transition-all duration-300 ${
                       !file || isUploading
-                        ? "bg-green-400 dark:bg-green-700 cursor-not-allowed"
-                        : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transform hover:scale-[1.02] shadow-md hover:shadow-green-500/30"
+                        ? "bg-green-900  cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-900 hover:from-green-600 hover:to-green-700 transform hover:scale-[1.02] shadow-md hover:shadow-green-500/30"
                     }`}
                   >
                     {isUploading ? (
@@ -1032,8 +1032,7 @@ export default function Home() {
               </h3>
               <p className="text-sm leading-relaxed">
                 After uploading your data, our system will automatically retrain the prediction model. This process
-                typically takes 5-10 minutes. You'll receive a notification when the retraining is complete, and your
-                predictions will immediately reflect the new data patterns.
+                typically takes 3-5 minutes. You'll receive a notification when the retraining is complete.
               </p>
             </div>
           </div>
@@ -1051,14 +1050,6 @@ export default function Home() {
             >
               <X className="h-6 w-6" />
             </button>
-
-            {/* <div className="mb-6 text-center">
-              <div className="h-16 w-16 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto mb-4">
-                <BarChart3 size={28} />
-              </div>
-              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">Predict Your Crop Yield</h2>
-              <p className="text-amber-700 dark:text-amber-300 mt-2">Enter your farming details below</p>
-            </div> */}
 
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -1102,7 +1093,7 @@ export default function Home() {
                       "Sorghum",
                       "Soybeans",
                       "Wheat",
-                      "Cassava",
+                  
                       "Sweet potatoes",
                       "Plantains",
                       "Yams",
