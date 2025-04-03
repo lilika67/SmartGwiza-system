@@ -931,7 +931,7 @@ export default function Home() {
               </h3>
               <p className="text-sm leading-relaxed">
                 After uploading your data, EzanAI will automatically retrain the prediction model. This process
-                typically takes 3-5 minutes. You'll receive a notification when the retraining is complete.
+                typically takes 3-5 minutes. You will receive a notification when the retraining is complete.
               </p>
             </div>
           </div>
