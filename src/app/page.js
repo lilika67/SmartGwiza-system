@@ -2,7 +2,6 @@
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import {
-  
   RefreshCw,
   X,
   Upload,
@@ -18,10 +17,10 @@ import {
   Cloud,
   Droplets,
   Thermometer,
+  Loader2,
 } from "lucide-react"
 import FarmerSlideshow from "../components/farmer-slideshow"
 import VisualizationSection from "../components/visualization-section"
-
 
 export default function Home() {
   // State variables
@@ -33,7 +32,6 @@ export default function Home() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isRetrainModalOpen, setIsRetrainModalOpen] = useState(false)
-  const [showUploadSection, setShowUploadSection] = useState(false)
   const [formData, setFormData] = useState({
     Area: "Rwanda",
     Item: "Maize",
@@ -49,7 +47,8 @@ export default function Home() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [theme, setTheme] = useState("light")
   const [animateHero, setAnimateHero] = useState(false)
-  const [showSuccessConfetti, setShowSuccessConfetti] = useState(false)
+  
+  const [isRetraining, setIsRetraining] = useState(false)
 
   const heroRef = useRef(null)
   const howItWorksRef = useRef(null)
@@ -65,12 +64,11 @@ export default function Home() {
     }, 300)
   }, [])
 
-  // Handle scroll events to update UI based on scroll position
+  // Handle scroll events 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
 
-      // Determine active section based on scroll position
       const sections = [
         { id: "hero", ref: heroRef },
         { id: "how-it-works", ref: howItWorksRef },
@@ -196,20 +194,7 @@ export default function Home() {
   // Retrain model with existing data
   const handleRetrainWithExistingData = async () => {
     try {
-      // Get the retrain button directly from the modal
-      const retrainButton = document.querySelector("#retrain-existing-data-button")
-      if (retrainButton) {
-        retrainButton.disabled = true
-        retrainButton.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Retraining...
-      `
-      }
-
-      setIsRetrainModalOpen(false)
+      setIsRetraining(true)
       setError("")
 
       const response = await fetch("https://ezanai.onrender.com/retrain/", {
@@ -226,10 +211,10 @@ export default function Home() {
         successNotification.className =
           "fixed top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 z-50 animate-slide-in-right"
         successNotification.innerHTML = `<svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg> 
-        <div>
-          <p class="font-medium">Model successfully retrained!</p>
-          <p class="text-sm opacity-90">Accuracy: ${(result.metrics.accuracy * 100).toFixed(2)}%</p>
-        </div>`
+      <div>
+        <p class="font-medium">Model successfully retrained!</p>
+        <p class="text-sm opacity-90">Accuracy: ${(result.metrics.accuracy * 100).toFixed(2)}%</p>
+      </div>`
         document.body.appendChild(successNotification)
 
         setTimeout(() => setShowSuccessConfetti(false), 5000)
@@ -238,7 +223,7 @@ export default function Home() {
         const visualizationSection = document.getElementById("visualization")
         if (visualizationSection) {
           visualizationSection.scrollIntoView({ behavior: "smooth" })
-          
+
           setTimeout(() => {
             const evaluationTab = document.querySelector('[data-tab="evaluation"]')
             if (evaluationTab) {
@@ -280,16 +265,19 @@ export default function Home() {
         document.body.removeChild(errorNotification)
       }, 5000)
     } finally {
+      setIsRetraining(false)
+      setIsRetrainModalOpen(false)
+
       // Reset button state for any retrain buttons in the UI
       const heroRetrainButton = document.querySelector(".retrain-button")
       if (heroRetrainButton) {
         heroRetrainButton.disabled = false
         heroRetrainButton.innerHTML = `
-          <svg class="h-5 w-5 transition-transform duration-300 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Retrain Model</span>
-        `
+        <svg class="h-5 w-5 transition-transform duration-300 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Retrain Model</span>
+      `
       }
     }
   }
@@ -332,11 +320,6 @@ export default function Home() {
           document.body.removeChild(successNotification)
         }, 5000)
 
-        // Scroll to visualization section
-        const visualizationSection = document.getElementById("visualization")
-        if (visualizationSection) {
-          visualizationSection.scrollIntoView({ behavior: "smooth" })
-        }
       } else {
         setError(result.detail || "Upload failed.")
       }
@@ -364,38 +347,10 @@ export default function Home() {
     setShowMobileMenu(false)
   }
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    document.documentElement.classList.toggle("dark")
-  }
-
+  
   return (
     <main className={`flex min-h-screen flex-col ${theme === "dark" ? "dark" : ""}`}>
-      
-      {/* {showSuccessConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50">
-          <div className="confetti-container">
-            {[...Array(50)].map((_, i) => (
-              <div
-                key={i}
-                className="confetti"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  width: `${Math.random() * 10 + 5}px`,
-                  height: `${Math.random() * 10 + 5}px`,
-                  backgroundColor: ["#4ade80", "#22c55e", "#16a34a", "#f59e0b", "#d97706"][
-                    Math.floor(Math.random() * 5)
-                  ],
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${Math.random() * 2 + 3}s`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )} */}
-
+     
       {/* Header with scroll effect */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -415,7 +370,7 @@ export default function Home() {
                 isScrolled ? "text-green-800 dark:text-white" : "text-white"
               }`}
             >
-              CropYield EzanaAIAI
+               EzanAI
             </span>
           </div>
 
@@ -429,7 +384,7 @@ export default function Home() {
                     ? "text-green-600 dark:text-green-400"
                     : "text-white"
                   : isScrolled
-                    ? "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
+                    ? "text-green-600 dark:text-green-400"
                     : "text-white/80 hover:text-white"
               }`}
             >
@@ -446,7 +401,7 @@ export default function Home() {
                     ? "text-green-600 dark:text-green-400"
                     : "text-white"
                   : isScrolled
-                    ? "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
+                    ? "text-green-600 dark:text-green-400"
                     : "text-white/80 hover:text-white"
               }`}
             >
@@ -463,11 +418,11 @@ export default function Home() {
                     ? "text-green-600 dark:text-green-400"
                     : "text-white"
                   : isScrolled
-                    ? "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
-                    : "text-white/80 hover:text-white"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-white"
               }`}
             >
-              Dashboard
+              
               {activeSection === "visualization" && (
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-current rounded-full"></span>
               )}
@@ -480,7 +435,7 @@ export default function Home() {
                     ? "text-green-600 dark:text-green-400"
                     : "text-white"
                   : isScrolled
-                    ? "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
+                    ? "text-green-600 dark:text-green-400"
                     : "text-white/80 hover:text-white"
               }`}
             >
@@ -493,47 +448,6 @@ export default function Home() {
 
           <div className="flex items-center gap-4">
             
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-full transition-colors ${
-                isScrolled
-                  ? "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              )}
-            </button>
 
             {/* Predict Button */}
             <button
@@ -605,18 +519,9 @@ export default function Home() {
                     : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                 }`}
               >
-               Visualization
+                Visualization
               </button>
-              <button
-                onClick={() => scrollToSection("upload")}
-                className={`text-left px-4 py-2 rounded-lg ${
-                  activeSection === "upload"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                Upload Data/Bulk data
-              </button>
+              
             </nav>
           </div>
         )}
@@ -742,7 +647,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-4 text-green-800 dark:text-green-300 text-center">Input Your Data</h3>
               <p className="text-amber-800 dark:text-amber-200 text-center mb-6">
-                Enter details about your location, crop type, year , weather conditions, and other farming practices like the amount of pesticides you will use.
+                Enter details about your location, crop type, year , weather conditions, and other farming practices
+                like the amount of pesticides you will use.
               </p>
               <div className="mt-6 flex justify-center">
                 <button
@@ -843,10 +749,6 @@ export default function Home() {
           </div>
 
           <VisualizationSection retrainResult={retrainResult} />
-          {/* 
-          <div className="mt-16">
-            <ModelInsights />
-          </div> */}
         </div>
       </section>
 
@@ -918,10 +820,8 @@ export default function Home() {
                       </div>
                     ) : (
                       <div>
-                        <h3 className="text-xl font-medium text-green-900  mb-2">
-                          Drag & Drop Your CSV File
-                        </h3>
-                        <p className="text-amber-700 dark:text-amber-300 mb-6">or click to browse from your computer</p>
+                        {/* <h3 className="text-xl font-medium text-green-900  mb-2">Drag & Drop Your CSV File</h3> */}
+                        <p className="text-amber-700 dark:text-amber-300 mb-6"> click to browse from your computer</p>
 
                         <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg text-sm text-green-800 dark:text-green-300 mb-6 max-w-md mx-auto">
                           <p className="font-medium mb-2">Your CSV should include:</p>
@@ -930,7 +830,6 @@ export default function Home() {
                             <li>Area</li>
                             <li>Yield data (kg/ha)</li>
                             <li>Weather conditions</li>
-                            
                           </ul>
                         </div>
 
@@ -960,7 +859,7 @@ export default function Home() {
                 )}
 
                 {uploadMessage && !error && (
-                  <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-3 text-green-700 dark:text-green-300 animate-fade-in">
+                  <div className="mt-6 p-4 dark:bg-green-900/30 border rounded-lg flex items-start gap-3 text-green-700 ">
                     <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                     <p>{uploadMessage}</p>
                   </div>
@@ -979,7 +878,7 @@ export default function Home() {
                     {isUploading ? (
                       <span className="flex items-center justify-center">
                         <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -1001,13 +900,13 @@ export default function Home() {
                         Processing...
                       </span>
                     ) : (
-                      "Upload and Retrain Model"
+                      "Upload Bulk data"
                     )}
                   </button>
                 </div>
 
                 <div className="mt-4 text-center text-sm text-amber-700 dark:text-amber-300">
-                  <p>Maximum file size: 10MB. Only CSV files are supported.</p>
+                  <p>Only CSV files are supported.</p>
                 </div>
               </div>
             </div>
@@ -1031,7 +930,7 @@ export default function Home() {
                 Training Process
               </h3>
               <p className="text-sm leading-relaxed">
-                After uploading your data, our system will automatically retrain the prediction model. This process
+                After uploading your data, EzanAI will automatically retrain the prediction model. This process
                 typically takes 3-5 minutes. You'll receive a notification when the retraining is complete.
               </p>
             </div>
@@ -1093,7 +992,7 @@ export default function Home() {
                       "Sorghum",
                       "Soybeans",
                       "Wheat",
-                  
+
                       "Sweet potatoes",
                       "Plantains",
                       "Yams",
@@ -1251,33 +1150,33 @@ export default function Home() {
               <div className="h-20 w-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto mb-4">
                 <CheckCircle size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">Prediction Results</h2>
+              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">Yield classification Prediction Results</h2>
               <p className="text-amber-700 dark:text-amber-300 mt-2">Based on your input data</p>
             </div>
 
             <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-6 mb-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <span className="text-green-600 dark:text-green-400">🌾</span>
+                  
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Crop Type</p>
+                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Crop Type : </p>
                     <p className="text-green-900 dark:text-green-300 font-medium">{formData.Item}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <span className="text-blue-600 dark:text-blue-400">📅</span>
+                  
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Year</p>
+                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Year :</p>
                     <p className="text-green-900 dark:text-green-300 font-medium">{formData.Year}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <span className="text-blue-600 dark:text-blue-400">💧</span>
+                  
                   <div>
                     <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">
-                      Average Rainfall
+                      Average Rainfall :
                     </p>
                     <p className="text-green-900 dark:text-green-300 font-medium">
                       {formData.average_rain_fall_mm_per_year} mm
@@ -1286,10 +1185,10 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <span className="text-yellow-600 dark:text-yellow-400">⚠️</span>
+                  
                   <div>
                     <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">
-                      Pesticides Used
+                      Pesticides Used :
                     </p>
                     <p className="text-green-900 dark:text-green-300 font-medium">
                       {formData.pesticides_tonnes} tonnes
@@ -1298,10 +1197,10 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <span className="text-red-600 dark:text-red-400">🌡️</span>
+                  
                   <div>
                     <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">
-                      Average Temperature
+                      Average Temperature :
                     </p>
                     <p className="text-green-900 dark:text-green-300 font-medium">{formData.avg_temp}°C</p>
                   </div>
@@ -1314,7 +1213,7 @@ export default function Home() {
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-green-600 dark:text-green-400 text-2xl">📊</span>
-                  <p className="text-green-900 dark:text-green-300 font-bold text-xl">{prediction}</p>
+                  <p className="text-green-900 dark:text-green-300 font-bold text-xl">{prediction} yield</p>
                 </div>
               </div>
             </div>
@@ -1354,46 +1253,69 @@ export default function Home() {
             <button
               onClick={() => setIsRetrainModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              disabled={isRetraining}
             >
               <X className="h-6 w-6" />
             </button>
 
             <div className="mb-6 text-center">
               <div className="h-20 w-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto mb-4">
-                <RefreshCw size={32} />
+                {isRetraining ? <Loader2 size={32} className="animate-spin" /> : <RefreshCw size={32} />}
               </div>
-              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">Retrain Model</h2>
-              <p className="text-amber-700 dark:text-amber-300 mt-2">Choose your retraining method</p>
+              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">
+                {isRetraining ? "Retraining Model..." : "Retrain Model"}
+              </h2>
+              <p className="text-amber-700 dark:text-amber-300 mt-2">
+                {isRetraining ? "Please wait while we process your request" : "Choose your retraining method"}
+              </p>
             </div>
 
             <div className="space-y-4">
               <div
                 id="retrain-existing-data-button"
-                onClick={handleRetrainWithExistingData}
-                className="border-2 border-green-200 dark:border-green-800 rounded-xl p-5 cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-200 group"
+                onClick={!isRetraining ? handleRetrainWithExistingData : undefined}
+                className={`border-2 border-green-200 dark:border-green-800 rounded-xl p-5 ${
+                  isRetraining
+                    ? "opacity-70 cursor-not-allowed"
+                    : "cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                } transition-all duration-200 group`}
               >
                 <div className="flex items-center gap-4">
                   <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 p-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    {isRetraining ? (
+                      <Loader2 className="h-6 w-6 text-green-600 dark:text-green-400 animate-spin" />
+                    ) : (
+                      <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-medium text-green-900 dark:text-green-300 text-lg">Use Existing Data</h3>
                     <p className="text-amber-700 dark:text-amber-300 text-sm">
-                      Retrain the model with data already in our database
+                      {isRetraining
+                        ? "Retraining in progress..."
+                        : "Retrain the model with data already in our database"}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div
-                onClick={() => {
-                  setIsRetrainModalOpen(false)
-                  scrollToSection("upload")
-                }}
-                className="border-2 border-green-200 dark:border-green-800 rounded-xl p-5 cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-200 group"
+                onClick={
+                  !isRetraining
+                    ? () => {
+                        setIsRetrainModalOpen(false)
+                        scrollToSection("upload")
+                      }
+                    : undefined
+                }
+                className={`border-2 border-green-200 dark:border-green-800 rounded-xl p-5 ${
+                  isRetraining
+                    ? "opacity-70 cursor-not-allowed"
+                    : "cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                } transition-all duration-200 group`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 p-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="rounded-full bg-gradient-to-br dark:from-green-900 dark:to-green-800 p-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <FileUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
@@ -1423,7 +1345,9 @@ export default function Home() {
                   />
                 </svg>
                 <span>
-                  Retraining the model may take a few minutes. You'll be notified when the process is complete.
+                  {isRetraining
+                    ? "Retraining is in progress. Please don't close this window."
+                    : "Retraining the model may take a few minutes. You'll be notified when the process is complete."}
                 </span>
               </p>
             </div>
@@ -1472,16 +1396,17 @@ export default function Home() {
                     Features
                   </Link>
                 </li>
-                
+
                 <li>
-                  <Link href="https://ezanai.onrender.com/docs" className="text-amber-300 dark:text-amber-400 hover:text-white transition-colors">
+                  <Link
+                    href="https://ezanai.onrender.com/docs"
+                    className="text-amber-300 dark:text-amber-400 hover:text-white transition-colors"
+                  >
                     API
                   </Link>
                 </li>
-                
               </ul>
             </div>
-           
           </div>
           <div className="border-t border-amber-900 dark:border-gray-800 mt-12 pt-8 text-center text-amber-400">
             <p>© {new Date().getFullYear()} CropYield AI. All rights reserved.</p>
@@ -1489,106 +1414,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Add CSS for animations */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeInDelay {
-          0% { opacity: 0; }
-          50% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes fadeInDelay2 {
-          0% { opacity: 0; }
-          70% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes scaleIn {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes slideInRight {
-          from { transform: translateX(30px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideDown {
-          from { transform: translateY(-20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-          100% { transform: translateY(0px); }
-        }
-        
-        @keyframes confettiFall {
-          0% { transform: translateY(-100vh) rotate(0deg); }
-          100% { transform: translateY(100vh) rotate(360deg); }
-        }
-        
-        .animate-fade-in {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        .animate-fade-in-delay {
-          animation: fadeInDelay 1s ease-out forwards;
-        }
-        
-        .animate-fade-in-delay-2 {
-          animation: fadeInDelay2 1.5s ease-out forwards;
-        }
-        
-        .animate-scale-in {
-          animation: scaleIn 0.5s ease-out forwards;
-        }
-        
-        .animate-slide-in-right {
-          animation: slideInRight 0.5s ease-out forwards;
-        }
-        
-        .animate-slide-down {
-          animation: slideDown 0.3s ease-out forwards;
-        }
-        
-        .animate-float-slow {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animation-delay-1000 {
-          animation-delay: 1s;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-3000 {
-          animation-delay: 3s;
-        }
-        
-        .confetti {
-          position: absolute;
-          top: -10px;
-          border-radius: 0%;
-          animation: confettiFall linear forwards;
-        }
-        
-        .confetti-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          z-index: 1000;
-        }
-      `}</style>
+      
     </main>
   )
 }
