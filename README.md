@@ -12,7 +12,6 @@ CropYield AI is an intelligent crop yield prediction platform that leverages mac
 - **Model Retraining**: Retrain the AI model with existing data or upload new datasets
 - **Data Visualization**: View model evaluation metrics including confusion matrices in a Colab-notebook style
 - **Responsive Design**: Fully responsive interface that works on desktop, tablet, and mobile devices
-- **Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing
 
 
 ## Technologies Used
@@ -22,7 +21,7 @@ CropYield AI is an intelligent crop yield prediction platform that leverages mac
 - **Tailwind CSS**: Utility-first CSS framework for styling
 - **Lucide React**: Icon library
 - **Chart.js**: Data visualization library
-- **SVG**: Custom visualizations for confusion matrices
+
 
 
 ## Installation
