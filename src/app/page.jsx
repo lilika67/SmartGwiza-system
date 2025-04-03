@@ -166,13 +166,7 @@ export default function Home() {
         setError("")
 
         const successNotification = document.createElement("div")
-        successNotification.className =
-          "fixed top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 z-50 animate-slide-in-right"
-        successNotification.innerHTML = `<svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg> 
-        <div>
-          <p class="font-medium">Model successfully retrained!</p>
-          <p class="text-sm opacity-90">Accuracy: ${(result.metrics.accuracy * 100).toFixed(2)}%</p>
-        </div>`
+       
         document.body.appendChild(successNotification)
 
         setTimeout(() => setShowSuccessConfetti(false), 5000)
@@ -213,7 +207,7 @@ export default function Home() {
         successNotification.innerHTML = `<svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg> 
       <div>
         <p class="font-medium">Model successfully retrained!</p>
-        <p class="text-sm opacity-90">Accuracy: ${(result.metrics.accuracy * 100).toFixed(2)}%</p>
+        <p class="text-sm opacity-90">Accuracy: ${(result?.metrics?.accuracy * 100).toFixed(2)}%</p>
       </div>`
         document.body.appendChild(successNotification)
 
@@ -313,7 +307,7 @@ export default function Home() {
         successNotification.className =
           "fixed bottom-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 z-50 animate-slide-in-right"
         successNotification.innerHTML =
-          '<svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg> File uploaded and model retrained!'
+          '<svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg> File uploaded, you can now use it to retrain!'
         document.body.appendChild(successNotification)
 
         setTimeout(() => {
@@ -556,7 +550,7 @@ export default function Home() {
                 onClick={() => setIsFormModalOpen(true)}
                 className="group flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/30"
               >
-                {/* <BarChart3 className="h-5 w-5" /> */}
+                
                 <span>Predict Yield</span>
                 <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
               </button>
@@ -930,8 +924,7 @@ export default function Home() {
                 Training Process
               </h3>
               <p className="text-sm leading-relaxed">
-                After uploading your data, EzanAI will automatically retrain the prediction model. This process
-                typically takes 3-5 minutes. You will receive a notification when the retraining is complete.
+                After uploading your data you can use it for retraining.
               </p>
             </div>
           </div>
