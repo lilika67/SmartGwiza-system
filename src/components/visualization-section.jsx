@@ -14,13 +14,13 @@ const visualizationImages = [
     description: "Shows the accuracy of predictions across different yield categories",
   },
   {
-    src: "/images/important.png",
+    src: "/images/dist.png",
     alt: "Feature Importance Chart",
     label: "Feature Importance",
-    description: "Highlights which factors most influence crop yield predictions",
+    description: "Highlights which factors most influence maize yield predictions",
   },
   {
-    src: "/images/visua.png",
+    src: "/images/conf.png",
     alt: "Correlation Heat Map",
     label: "Correlation Heat Map",
     description: "Visualizes relationships between different agricultural variables",
@@ -65,7 +65,7 @@ export default function VisualizationSection({ retrainResult }) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-xl font-bold text-green-900 dark:text-green-300">Crop Yield Analysis</h3>
-            <p className="text-amber-700 dark:text-amber-300">Compare actual and predicted yields for your crops</p>
+            <p className="text-white">Compare actual and predicted yields for your crops</p>
           </div>
          
         </div>
@@ -101,7 +101,7 @@ export default function VisualizationSection({ retrainResult }) {
           </button>
           
          
-          <button
+          {/* <button
             data-tab="evaluation"
             onClick={() => setActiveTab("evaluation")}
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
@@ -133,7 +133,7 @@ export default function VisualizationSection({ retrainResult }) {
                 </span>
               )}
             </span>
-          </button>
+          </button> */}
         </div>
 
         {activeTab === "visualizations" && (
@@ -164,13 +164,13 @@ export default function VisualizationSection({ retrainResult }) {
                   </div>
                   <div className="p-4">
                     <h4 className="text-lg font-medium text-green-800 dark:text-green-300 mb-1">{image.label}</h4>
-                    <p className="text-sm text-amber-700 dark:text-amber-300">{image.description}</p>
+                    <p className="text-sm text-white">{image.description}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-amber-800 dark:text-amber-300 text-sm">
+            <div className="mt-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-white text-sm">
               <p className="flex items-start gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +199,7 @@ export default function VisualizationSection({ retrainResult }) {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-green-100 dark:border-green-900 shadow-sm mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">Model Evaluation Metrics</h3>
-                <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
+                <div className="text-sm text-white bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
                   Last retrained: {new Date().toLocaleDateString()}
                 </div>
               </div>
@@ -243,7 +243,7 @@ export default function VisualizationSection({ retrainResult }) {
                   <h4 className="text-md font-medium text-green-800 dark:text-green-300 mb-2">
                     Accuracy Interpretation
                   </h4>
-                  <p className="text-amber-800 dark:text-amber-300 text-sm">
+                  <p className="text-white text-sm">
                     The model correctly predicts {(retrainResult.metrics.accuracy * 100).toFixed(2)}% of all crop yield
                     categories. This indicates {retrainResult.metrics.accuracy > 0.75 ? "strong" : "moderate"} overall
                     performance across all yield classes.

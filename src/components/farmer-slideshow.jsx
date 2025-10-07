@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import Image from "next/image"
 
 const heroImage = {
-  src: "/images/fam.jpg",
+  src: "/images/maize.jpg",
   alt: "Farmer inspecting crops in a wheat field at sunset",
 }
 
@@ -26,7 +26,7 @@ export default function FarmerSlideshow() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 z-10"></div>
+      <div className="absolute inset-0   z-10"></div>
 
       {/* Hero Image with Parallax */}
       <div ref={imageRef} className="h-[120%] w-full absolute top-0 left-0">
