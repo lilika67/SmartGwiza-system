@@ -798,7 +798,7 @@ export default function Home() {
                   className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="e.g., 2025"
                   min="1985"
-                  max="2035"
+                  max="2028"
                   required
                 />
               </div>
