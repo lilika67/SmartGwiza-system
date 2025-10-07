@@ -8,10 +8,10 @@ import {  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } fr
 // the visualization images
 const visualizationImages = [
   {
-    src: "/images/confusion-ran.png",
-    alt: "Confusion Matrix from Random Forest Model",
-    label: "Confusion Matrix",
-    description: "Shows the accuracy of predictions across different yield categories",
+    src: "/images/scatter.png",
+    alt: "scatter plots",
+    label: "scatter plots",
+    description: "scatter plots  explores relationships between yield and each feature (temperature, pesticides, year).",
   },
   {
     src: "/images/dist.png",
