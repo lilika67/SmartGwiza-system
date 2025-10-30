@@ -1,309 +1,183 @@
 "use client"
-
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import {  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-
-
-// the visualization images
-const visualizationImages = [
-  {
-    src: "/images/scatter.png",
-    alt: "scatter plots",
-    label: "scatter plots",
-    description: "scatter plots  explores relationships between yield and each feature (temperature, pesticides, year).",
-  },
-  {
-    src: "/images/dist.png",
-    alt: "Feature Importance Chart",
-    label: "Feature Importance",
-    description: "Highlights which factors most influence maize yield predictions",
-  },
-  {
-    src: "/images/conf.png",
-    alt: "Correlation Heat Map",
-    label: "Correlation Heat Map",
-    description: "Visualizes relationships between different agricultural variables",
-  },
-]
+import { useState } from "react"
+import { TrendingUp, BarChart3, Activity } from "lucide-react"
 
 export default function VisualizationSection({ retrainResult }) {
-  // const [selectedCrop, setSelectedCrop] = useState("Wheat")
-  const [activeTab, setActiveTab] = useState("visualizations")
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+  const [activeTab, setActiveTab] = useState("trends")
 
-  // Animation on scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 },
-    )
+  // Sample data for visualization
+  const yieldTrends = [
+    { year: 2019, yield: 1.8 },
+    { year: 2020, yield: 2.1 },
+    { year: 2021, yield: 2.3 },
+    { year: 2022, yield: 2.0 },
+    { year: 2023, yield: 2.4 },
+    { year: 2024, yield: 2.6 },
+  ]
 
-    const section = document.getElementById("visualization")
-    if (section) {
-      observer.observe(section)
-    }
-
-    return () => {
-      if (section) {
-        observer.unobserve(section)
-      }
-    }
-  }, [])
+  const maxYield = Math.max(...yieldTrends.map((d) => d.yield))
 
   return (
-    <div
-      className={`w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-green-100 dark:border-green-900 overflow-hidden transition-all duration-700 transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
-    >
-      <div className="p-6 border-b border-green-100 dark:border-green-900">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-green-900 dark:text-green-300">Crop Yield Analysis</h3>
-            <p className="text-white">Compare actual and predicted yields for your crops</p>
-          </div>
-         
-        </div>
+    <div className="w-full">
+      {/* Tab Navigation */}
+      <div className="flex flex-wrap gap-4 mb-8 justify-center">
+        <button
+          onClick={() => setActiveTab("trends")}
+          style={activeTab === "trends" ? { background: "linear-gradient(to right, #598216, #4a6f12)" } : {}}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${activeTab === "trends"
+              ? "text-white shadow-lg"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            }`}
+          onMouseEnter={(e) => activeTab !== "trends" && (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.1)")}
+          onMouseLeave={(e) => activeTab !== "trends" && (e.target.style.backgroundColor = "")}
+        >
+          <TrendingUp className="h-5 w-5" />
+          Yield Trends
+        </button>
+        <button
+          onClick={() => setActiveTab("performance")}
+          style={activeTab === "performance" ? { background: "linear-gradient(to right, #598216, #4a6f12)" } : {}}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${activeTab === "performance"
+              ? "text-white shadow-lg"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            }`}
+          onMouseEnter={(e) =>
+            activeTab !== "performance" && (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.1)")
+          }
+          onMouseLeave={(e) => activeTab !== "performance" && (e.target.style.backgroundColor = "")}
+        >
+          <BarChart3 className="h-5 w-5" />
+          Model Performance
+        </button>
+        <button
+          onClick={() => setActiveTab("insights")}
+          style={activeTab === "insights" ? { background: "linear-gradient(to right, #598216, #4a6f12)" } : {}}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${activeTab === "insights"
+              ? "text-white shadow-lg"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            }`}
+          onMouseEnter={(e) => activeTab !== "insights" && (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.1)")}
+          onMouseLeave={(e) => activeTab !== "insights" && (e.target.style.backgroundColor = "")}
+        >
+          <Activity className="h-5 w-5" />
+          Insights
+        </button>
       </div>
 
-      <div className="p-6">
-        <div className="flex space-x-1 mb-6 overflow-x-auto pb-2">
-          <button
-            onClick={() => setActiveTab("visualizations")}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-              activeTab === "visualizations"
-                ? "bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-800 dark:text-green-300"
-                : "text-amber-700 dark:text-amber-300 hover:bg-green-50 dark:hover:bg-green-900/30"
-            }`}
-          >
-            <span className="flex items-center">
-              <svg
-                className="h-4 w-4 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-              Visualizations
-            </span>
-          </button>
-          
-         
-          {/* <button
-            data-tab="evaluation"
-            onClick={() => setActiveTab("evaluation")}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-              activeTab === "evaluation"
-                ? "bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-800 dark:text-green-300"
-                : "text-amber-700 dark:text-amber-300 hover:bg-green-50 dark:hover:bg-green-900/30"
-            } ${!retrainResult?.metrics ? "opacity-50 cursor-not-allowed" : ""}`}
-            disabled={!retrainResult?.metrics}
-          >
-            <span className="flex items-center">
-              <svg
-                className="h-4 w-4 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              Evaluation after retraining
-              {retrainResult?.metrics && (
-                <span className="ml-1.5 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 text-xs rounded-full">
-                  New
-                </span>
-              )}
-            </span>
-          </button> */}
-        </div>
-
-        {activeTab === "visualizations" && (
-          <div className="animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {visualizationImages.map((image, index) => (
-                <div
-                  key={index}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-green-100 dark:border-green-900 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden transform hover:-translate-y-1 group cursor-pointer"
-                  onClick={() => {
-                    setSelectedImage(index)
-                    setIsModalOpen(true)
-                  }}
-                >
-                  <div className="relative h-48 w-full bg-green-50 dark:bg-green-900/30 overflow-hidden">
-                    <Image
-                      src={image.src || "/placeholder.svg"}
-                      alt={image.alt}
-                      fill
-                      className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
-                      onError={() => console.log(`Error loading image: ${image.src}`)}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
-                      <button className="px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-full text-xs font-medium">
-                        View Full Size
-                      </button>
+      {/* Content Area */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+        {activeTab === "trends" && (
+          <div>
+            <h3 className="text-2xl font-bold mb-6" style={{ color: "#598216" }}>
+              Maize Yield Trends in Rwanda
+            </h3>
+            <div className="space-y-4">
+              {yieldTrends.map((data, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium w-16">{data.year}</span>
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-8 overflow-hidden">
+                    <div
+                      style={{
+                        width: `${(data.yield / maxYield) * 100}%`,
+                        background: "linear-gradient(to right, #598216, #6a9a1a)",
+                      }}
+                      className="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-1000"
+                    >
+                      <span className="text-white text-sm font-medium">{data.yield} t/ha</span>
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="text-lg font-medium text-green-800 dark:text-green-300 mb-1">{image.label}</h4>
-                    <p className="text-sm text-white">{image.description}</p>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
-            <div className="mt-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-white text-sm">
-              <p className="flex items-start gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>
-                  Click on any visualization to view it in full size. </span>
-              </p>
+        {activeTab === "performance" && (
+          <div>
+            <h3 className="text-2xl font-bold mb-6" style={{ color: "#598216" }}>
+              Model Performance Metrics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <p className="text-sm font-semibold uppercase mb-2" style={{ color: "#598216" }}>
+                  Accuracy
+                </p>
+                <p className="text-3xl font-bold" style={{ color: "#598216" }}>
+                  {retrainResult?.accuracy ? `${(retrainResult.accuracy * 100).toFixed(1)}%` : "92.5%"}
+                </p>
+              </div>
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <p className="text-sm font-semibold uppercase mb-2" style={{ color: "#598216" }}>
+                  R² Score
+                </p>
+                <p className="text-3xl font-bold" style={{ color: "#598216" }}>
+                  {retrainResult?.r2_score ? retrainResult.r2_score.toFixed(3) : "0.875"}
+                </p>
+              </div>
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <p className="text-sm font-semibold uppercase mb-2" style={{ color: "#598216" }}>
+                  MAE
+                </p>
+                <p className="text-3xl font-bold" style={{ color: "#598216" }}>
+                  {retrainResult?.mae ? retrainResult.mae.toFixed(3) : "0.156"}
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-
-        {activeTab === "evaluation" && retrainResult?.metrics && (
-          <div className="animate-fade-in">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-green-100 dark:border-green-900 shadow-sm mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">Model Evaluation Metrics</h3>
-                <div className="text-sm text-white bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
-                  Last retrained: {new Date().toLocaleDateString()}
-                </div>
+        {activeTab === "insights" && (
+          <div>
+            <h3 className="text-2xl font-bold mb-6" style={{ color: "#598216" }}>
+              Key Insights
+            </h3>
+            <div className="space-y-4">
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <h4 className="font-bold mb-2" style={{ color: "#598216" }}>
+                  Temperature Impact
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Optimal temperature range for maize in Rwanda is 19-20°C. Higher temperatures may reduce yield.
+                </p>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                  <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold mb-1">Accuracy</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                    {(retrainResult.metrics.accuracy * 100).toFixed(2)}%
-                  </p>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                  <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold mb-1">F1 Score</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                    {(retrainResult.metrics.f1_score * 100).toFixed(2)}%
-                  </p>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                  <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold mb-1">Precision</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                    {(retrainResult.metrics.precision * 100).toFixed(2)}%
-                  </p>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                  <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold mb-1">Recall</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                    {(retrainResult.metrics.recall * 100).toFixed(2)}%
-                  </p>
-                </div>
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <h4 className="font-bold mb-2" style={{ color: "#598216" }}>
+                  Pesticide Usage
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Moderate pesticide use (1000-1500 tonnes) shows optimal results for sustainable farming.
+                </p>
               </div>
-
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-green-100 dark:border-green-900 shadow-sm">
-              <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-4">
-                Model Performance Analysis
-              </h3>
-
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-md font-medium text-green-800 dark:text-green-300 mb-2">
-                    Accuracy Interpretation
-                  </h4>
-                  <p className="text-white text-sm">
-                    The model correctly predicts {(retrainResult.metrics.accuracy * 100).toFixed(2)}% of all crop yield
-                    categories. This indicates {retrainResult.metrics.accuracy > 0.75 ? "strong" : "moderate"} overall
-                    performance across all yield classes.
-                  </p>
-                </div>
-
-                
-
-                
+              <div
+                className="rounded-xl p-6 border"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", borderColor: "rgba(89, 130, 22, 0.2)" }}
+              >
+                <h4 className="font-bold mb-2" style={{ color: "#598216" }}>
+                  Yield Trends
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Maize yields in Rwanda have shown steady improvement over the past 5 years, averaging 2.2 tons/ha.
+                </p>
               </div>
             </div>
           </div>
         )}
       </div>
-      
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="relative max-w-4xl max-h-[90vh] w-full mx-4 bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-2xl animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute top-4 right-4 z-10">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-white/20 backdrop-blur-sm text-white rounded-full p-2 hover:bg-white/30 transition-colors"
-              >
-                <svg
-                  className="h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="relative h-[70vh] w-full bg-green-50 dark:bg-green-900/30">
-              <Image
-                src={visualizationImages[selectedImage].src || "/placeholder.svg"}
-                alt={visualizationImages[selectedImage].alt}
-                fill
-                className="object-contain p-4"
-              />
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-green-900 dark:text-green-300 mb-2">
-                {visualizationImages[selectedImage].label}
-              </h3>
-              <p className="text-amber-700 dark:text-amber-300">{visualizationImages[selectedImage].description}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
-

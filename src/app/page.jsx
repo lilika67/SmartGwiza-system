@@ -1,27 +1,25 @@
-
 "use client"
+
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import {
-  RefreshCw,
   X,
-  Upload,
   CheckCircle,
   AlertCircle,
   FileText,
   ChevronRight,
   Database,
-  FileUp,
   ArrowRight,
   Leaf,
   Sun,
   Cloud,
   Droplets,
   Thermometer,
-  Loader2,
 } from "lucide-react"
 import FarmerSlideshow from "../components/farmer-slideshow"
 import VisualizationSection from "../components/visualization-section"
+import { LoginForm } from "../components/login-form"
+import { SignupForm } from "../components/signup-form"
 
 export default function Home() {
   // State variables
@@ -33,6 +31,8 @@ export default function Home() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isRetrainModalOpen, setIsRetrainModalOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     country: "Rwanda",
     crop: "Maize",
@@ -71,12 +71,10 @@ export default function Home() {
         { id: "hero", ref: heroRef },
         { id: "how-it-works", ref: howItWorksRef },
         { id: "visualization", ref: visualizationRef },
-        // { id: "upload", ref: uploadRef },
       ]
 
       for (const section of sections) {
         if (!section.ref.current) continue
-
         const rect = section.ref.current.getBoundingClientRect()
         if (rect.top <= 100 && rect.bottom >= 100) {
           setActiveSection(section.id)
@@ -112,7 +110,6 @@ export default function Home() {
   const handleDrop = (e) => {
     e.preventDefault()
     setIsDragging(false)
-
     const droppedFile = e.dataTransfer.files[0]
     if (droppedFile && droppedFile.name.endsWith(".csv")) {
       setFile(droppedFile)
@@ -135,7 +132,6 @@ export default function Home() {
     return "High"
   }
 
-  // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -143,7 +139,8 @@ export default function Home() {
       const submitButton = e.target.querySelector('button[type="submit"]')
       if (submitButton) {
         submitButton.disabled = true
-        submitButton.innerHTML = '<svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...'
+        submitButton.innerHTML =
+          '<svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...'
       }
 
       const payload = {
@@ -155,7 +152,9 @@ export default function Home() {
 
       const response = await fetch("https://smartgwizas.onrender.com/predict", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       })
 
@@ -169,12 +168,14 @@ export default function Home() {
       const result = await response.json()
       console.log("Response data:", result)
 
-      const yieldTonsHa = result.predicted_yield / 10000 // Convert hg/ha to tons/ha
+      const yieldTonsHa = result.predicted_yield / 10000
+
       setPrediction({
         value: yieldTonsHa.toFixed(3),
         category: getYieldCategory(yieldTonsHa),
         warning: result.warning || null,
       })
+
       setIsFormModalOpen(false)
       setIsResultsModalOpen(true)
 
@@ -196,7 +197,6 @@ export default function Home() {
     }
   }
 
-  // Retrain model with existing data
   const handleRetrainWithExistingData = async () => {
     try {
       setIsRetraining(true)
@@ -235,7 +235,6 @@ export default function Home() {
     }
   }
 
-  // Upload and retrain with new data
   const handleUpload = async (e) => {
     e.preventDefault()
     if (!file) {
@@ -287,6 +286,7 @@ export default function Home() {
     setIsRetrainModalOpen(true)
   }
 
+  // Scroll to section function
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId)
     if (section) {
@@ -297,179 +297,226 @@ export default function Home() {
 
   return (
     <main className={`flex min-h-screen flex-col ${theme === "dark" ? "dark" : ""}`}>
-      {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg py-2" : "bg-transparent py-4"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${isScrolled
+            ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl py-2 border-b border-green-100/20 dark:border-green-900/20"
+            : "bg-transparent py-3 sm:py-4"
+          }`}
       >
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`relative transition-all duration-500 ${isScrolled ? "scale-90" : "scale-100"}`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 rounded-full blur-md opacity-20"></div>
-              <Leaf className={`h-7 w-7 relative ${isScrolled ? "text-green-600 dark:text-green-400" : "text-white"}`} />
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 sm:gap-2 group cursor-pointer">
+            <div className={`relative transition-all duration-700 ${isScrolled ? "scale-90" : "scale-100"}`}>
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#598216] via-[#6a9a1a] to-[#598216] rounded-full opacity-0 group-hover:opacity-75 blur-xl transition-all duration-700 animate-pulse"></div>
+              <img
+                src="/images/smartgwizalogo.png"
+                alt="SmartGwiza Logo"
+                className="h-14 w-14 sm:h-16 sm:w-16 lg:h-20 lg:w-20 rounded-full object-contain relative z-10 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ring-2 ring-transparent group-hover:ring-[#598216]/30"
+              />
             </div>
             <span
-              className={`text-xl font-bold transition-colors duration-500 ${
-                isScrolled ? "text-green-800 dark:text-white" : "text-white"
-              }`}
+              className={`text-base sm:text-lg lg:text-xl font-bold transition-all duration-700 ${isScrolled ? "text-gray-800 dark:text-white" : "text-white"
+                } group-hover:scale-105`}
             >
-              Smart<span className="text-green-600">Gwiza</span>
+              Smart<span style={{ color: "#598216" }}>Gwiza</span>
             </span>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Navigation - Enhanced with lg breakpoint */}
+          <nav className="hidden lg:flex items-center gap-2 bg-white/40 dark:bg-gray-800/40 backdrop-blur-2xl rounded-full px-3 py-2 shadow-xl border border-white/20 dark:border-gray-700/20">
             <button
               onClick={() => scrollToSection("hero")}
-              className={`text-sm font-medium transition-all duration-300 relative ${
-                activeSection === "hero"
-                  ? isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white"
+              className={`relative px-4 xl:px-5 py-2.5 text-sm font-medium transition-all duration-500 rounded-full ${activeSection === "hero"
+                  ? "text-white scale-105"
                   : isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white/80 hover:text-white"
-              }`}
+                    ? "text-[#598216] dark:text-[#6a9a1a] hover:text-[#4a6f12] dark:hover:text-[#598216] hover:scale-105"
+                    : "text-white/90 hover:text-white hover:scale-105"
+                }`}
             >
-              Home
               {activeSection === "hero" && (
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-current rounded-full"></span>
+                <>
+                  <span
+                    className="absolute inset-0 rounded-full transition-all duration-500"
+                    style={{
+                      background: "linear-gradient(135deg, #598216 0%, #6a9a1a 50%, #598216 100%)",
+                      backgroundSize: "200% 100%",
+                      animation: "shimmer 3s ease-in-out infinite",
+                    }}
+                  ></span>
+                  <span className="absolute inset-0 bg-[#598216] rounded-full blur-lg opacity-50 animate-pulse"></span>
+                </>
               )}
+              <span className="relative z-10">Home</span>
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className={`text-sm font-medium transition-all duration-300 relative ${
-                activeSection === "how-it-works"
-                  ? isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white"
+              className={`relative px-4 xl:px-5 py-2.5 text-sm font-medium transition-all duration-500 rounded-full ${activeSection === "how-it-works"
+                  ? "text-white scale-105"
                   : isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white/80 hover:text-white"
-              }`}
+                    ? "text-[#598216] dark:text-[#6a9a1a] hover:text-[#4a6f12] dark:hover:text-[#598216] hover:scale-105"
+                    : "text-white/90 hover:text-white hover:scale-105"
+                }`}
             >
-              How It Works
               {activeSection === "how-it-works" && (
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-current rounded-full"></span>
+                <>
+                  <span
+                    className="absolute inset-0 rounded-full transition-all duration-500"
+                    style={{
+                      background: "linear-gradient(135deg, #598216 0%, #6a9a1a 50%, #598216 100%)",
+                      backgroundSize: "200% 100%",
+                      animation: "shimmer 3s ease-in-out infinite",
+                    }}
+                  ></span>
+                  <span className="absolute inset-0 bg-[#598216] rounded-full blur-lg opacity-50 animate-pulse"></span>
+                </>
               )}
+              <span className="relative z-10">How It Works</span>
             </button>
             <button
               onClick={() => scrollToSection("visualization")}
-              className={`text-sm font-medium transition-all duration-300 relative ${
-                activeSection === "visualization"
-                  ? isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white"
+              className={`relative px-4 xl:px-5 py-2.5 text-sm font-medium transition-all duration-500 rounded-full ${activeSection === "visualization"
+                  ? "text-white scale-105"
                   : isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white/80 hover:text-white"
-              }`}
+                    ? "text-[#598216] dark:text-[#6a9a1a] hover:text-[#4a6f12] dark:hover:text-[#598216] hover:scale-105"
+                    : "text-white/90 hover:text-white hover:scale-105"
+                }`}
             >
-              Visualization
               {activeSection === "visualization" && (
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-current rounded-full"></span>
+                <>
+                  <span
+                    className="absolute inset-0 rounded-full transition-all duration-500"
+                    style={{
+                      background: "linear-gradient(135deg, #598216 0%, #6a9a1a 50%, #598216 100%)",
+                      backgroundSize: "200% 100%",
+                      animation: "shimmer 3s ease-in-out infinite",
+                    }}
+                  ></span>
+                  <span className="absolute inset-0 bg-[#598216] rounded-full blur-lg opacity-50 animate-pulse"></span>
+                </>
               )}
+              <span className="relative z-10">Visualization</span>
             </button>
-            {/* <button
-              onClick={() => scrollToSection("upload")}
-              className={`text-sm font-medium transition-all duration-300 relative ${
-                activeSection === "upload"
-                  ? isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white"
-                  : isScrolled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-white/80 hover:text-white"
-              }`}
+            {/* CHANGE: Added Blog navigation link */}
+            <Link
+              href="/blog"
+              className={`relative px-4 xl:px-5 py-2.5 text-sm font-medium transition-all duration-500 rounded-full ${isScrolled
+                  ? "text-[#598216] dark:text-[#6a9a1a] hover:text-[#4a6f12] dark:hover:text-[#598216] hover:scale-105"
+                  : "text-white/90 hover:text-white hover:scale-105"
+                }`}
             >
-              Upload Data
-              {activeSection === "upload" && (
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-current rounded-full"></span>
-              )}
-            </button> */}
+              <span className="relative z-10">Blog</span>
+            </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+            <button
+              onClick={() => setIsLoginModalOpen(true)}
+              className={`hidden sm:block px-3 sm:px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm rounded-full font-medium transition-all duration-500 hover:scale-110 active:scale-95 ${isScrolled
+                  ? "text-[#598216] dark:text-[#6a9a1a] hover:bg-[#598216]/10 dark:hover:bg-[#598216]/20 ring-1 ring-[#598216]/20 hover:ring-[#598216]/40"
+                  : "text-white hover:bg-white/10 ring-1 ring-white/20 hover:ring-white/40"
+                }`}
+            >
+              Login
+            </button>
             <button
               onClick={() => setIsFormModalOpen(true)}
-              className={`px-5 py-2.5 text-sm rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
-                isScrolled
-                  ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white dark:from-green-500 dark:to-green-600"
-                  : "bg-white text-green-800 hover:bg-green-50"
-              }`}
+              className="hidden sm:flex group relative px-3 sm:px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm rounded-full font-medium text-white transition-all duration-500 hover:scale-110 active:scale-95 overflow-hidden shadow-lg hover:shadow-2xl items-center"
+              style={{
+                background: isScrolled ? "linear-gradient(135deg, #598216 0%, #4a6f12 100%)" : undefined,
+                backgroundColor: isScrolled ? undefined : "white",
+                color: isScrolled ? "white" : "#598216",
+              }}
             >
-              <span className="flex items-center">
-                Predict Yield Now
-                <ChevronRight className="h-4 w-4 ml-1" />
+              <span
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                style={{
+                  background: "linear-gradient(135deg, #6a9a1a 0%, #598216 50%, #6a9a1a 100%)",
+                  backgroundSize: "200% 100%",
+                  animation: "shimmer 2s ease-in-out infinite",
+                }}
+              ></span>
+              <span className="absolute inset-0 bg-[#598216] rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></span>
+              <span className="relative z-10 flex items-center">
+                <span className="hidden md:inline">Predict Yield Now</span>
+                <span className="md:hidden">Predict</span>
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" />
               </span>
             </button>
 
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-lg text-white"
+              className="lg:hidden p-3 rounded-lg transition-all duration-300 hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Toggle menu"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-6 w-6 transition-colors ${isScrolled ? "text-gray-800 dark:text-white" : "text-white"}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {showMobileMenu ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              <div className="relative w-6 h-6">
+                <span
+                  className={`absolute left-0 top-1 w-6 h-0.5 rounded-full transition-all duration-300 ${isScrolled ? "bg-gray-800 dark:bg-white" : "bg-white"
+                    } ${showMobileMenu ? "rotate-45 top-2.5" : ""}`}
+                ></span>
+                <span
+                  className={`absolute left-0 top-2.5 w-6 h-0.5 rounded-full transition-all duration-300 ${isScrolled ? "bg-gray-800 dark:bg-white" : "bg-white"
+                    } ${showMobileMenu ? "opacity-0" : ""}`}
+                ></span>
+                <span
+                  className={`absolute left-0 top-4 w-6 h-0.5 rounded-full transition-all duration-300 ${isScrolled ? "bg-gray-800 dark:bg-white" : "bg-white"
+                    } ${showMobileMenu ? "-rotate-45 top-2.5" : ""}`}
+                ></span>
+              </div>
             </button>
           </div>
         </div>
 
         {showMobileMenu && (
-          <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg rounded-b-2xl mt-2 py-4 px-4 animate-slide-down">
-            <nav className="flex flex-col space-y-4">
-              <button
-                onClick={() => scrollToSection("hero")}
-                className={`text-left px-4 py-2 rounded-lg ${
-                  activeSection === "hero"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() => scrollToSection("how-it-works")}
-                className={`text-left px-4 py-2 rounded-lg ${
-                  activeSection === "how-it-works"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                How It Works
-              </button>
-              <button
-                onClick={() => scrollToSection("visualization")}
-                className={`text-left px-4 py-2 rounded-lg ${
-                  activeSection === "visualization"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                Visualization
-              </button>
-              <button
-                onClick={() => scrollToSection("upload")}
-                className={`text-left px-4 py-2 rounded-lg ${
-                  activeSection === "upload"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-              >
-                Upload Data
-              </button>
+          <div className="lg:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl shadow-2xl rounded-b-2xl mt-2 py-4 px-3 sm:px-4 border-t border-green-100/20 dark:border-green-900/20 animate-slide-down">
+            <nav className="flex flex-col space-y-2">
+              {[
+                { id: "hero", label: "Home", delay: "0ms" },
+                { id: "how-it-works", label: "How It Works", delay: "75ms" },
+                { id: "visualization", label: "Visualization", delay: "150ms" },
+                { id: "blog", label: "Blog", delay: "225ms" }, // Added Blog link
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`text-left px-4 py-3.5 rounded-xl font-medium transition-all duration-500 transform hover:scale-[1.02] min-h-[44px] ${activeSection === item.id
+                      ? "text-white shadow-lg ring-2 ring-[#598216]/30"
+                      : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                    }`}
+                  style={{
+                    backgroundColor: activeSection === item.id ? "#598216" : undefined,
+                    animation: `slideIn 0.5s ease-out ${item.delay} both`,
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+
+              <div className="sm:hidden flex flex-col gap-2 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => {
+                    setIsLoginModalOpen(true)
+                    setShowMobileMenu(false)
+                  }}
+                  className="text-left px-4 py-3.5 rounded-xl font-medium transition-all duration-500 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 min-h-[44px]"
+                  style={{
+                    animation: "slideIn 0.5s ease-out 300ms both",
+                  }}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setIsFormModalOpen(true)
+                    setShowMobileMenu(false)
+                  }}
+                  className="text-left px-4 py-3.5 rounded-xl font-medium transition-all duration-500 text-white shadow-lg min-h-[44px]"
+                  style={{
+                    backgroundColor: "#598216",
+                    animation: "slideIn 0.5s ease-out 375ms both",
+                  }}
+                >
+                  Predict Yield Now
+                </button>
+              </div>
             </nav>
           </div>
         )}
@@ -485,7 +532,12 @@ export default function Home() {
             >
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 Predict Maize Yield with{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-600">AI</span>
+                <span
+                  className="text-transparent bg-clip-text"
+                  style={{ backgroundImage: "linear-gradient(to right, #6a9a1a, #598216)" }}
+                >
+                  AI
+                </span>
               </h1>
             </div>
             <div
@@ -500,18 +552,12 @@ export default function Home() {
             >
               <button
                 onClick={() => setIsFormModalOpen(true)}
-                className="group flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/30"
+                style={{ background: "linear-gradient(to right, #598216, #4a6f12)" }}
+                className="group flex items-center justify-center gap-2 px-8 py-4 hover:opacity-90 text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <span>Predict Yield</span>
                 <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
               </button>
-              {/* <button
-                onClick={openRetrainModal}
-                className="group flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                <RefreshCw className="h-5 w-5 transition-transform duration-300 group-hover:rotate-180" />
-                <span>Retrain Model</span>
-              </button> */}
             </div>
             <div
               className={`mt-16 transition-all duration-1000 delay-700 transform ${animateHero ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
@@ -557,30 +603,47 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center text-center mb-16">
             <div className="relative mb-6">
-              <h2 className="text-3xl md:text-5xl font-bold text-green-900 dark:text-green-400 relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold relative z-10" style={{ color: "#598216" }}>
                 How It Works
               </h2>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-green-500 rounded-full blur-md opacity-50"></div>
+              <div
+                className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 rounded-full"
+                style={{ background: "linear-gradient(to right, #598216, #6a9a1a)" }}
+              ></div>
+              <div
+                className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 rounded-full blur-md opacity-50"
+                style={{ backgroundColor: "#598216" }}
+              ></div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl text-lg">
               Our AI model predicts maize yield for Rwandan farmers using year, pesticide use, and temperature data.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-green-100 dark:border-green-900 transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-              <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 w-20 h-20 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500">
-                <FileText className="h-10 w-10 text-green-600 dark:text-green-400" />
+          <div className="flex flex-row justify-center gap-8 overflow-x-auto pb-4">
+            <div
+              className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group flex-shrink-0 w-full md:w-96"
+              style={{ borderWidth: "1px", borderColor: "rgba(89, 130, 22, 0.2)" }}
+            >
+              <div
+                className="rounded-full w-24 h-24 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500"
+                style={{
+                  background: "linear-gradient(to bottom right, rgba(89, 130, 22, 0.2), rgba(89, 130, 22, 0.3))",
+                }}
+              >
+                <FileText className="h-12 w-12" style={{ color: "#598216" }} />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-green-800 dark:text-green-300 text-center">Input Your Data</h3>
+              <h3 className="text-xl font-bold mb-4 text-center" style={{ color: "#598216" }}>
+                Input Your Data
+              </h3>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 Enter the year, pesticide usage, and average temperature for your maize farm in Rwanda.
               </p>
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => setIsFormModalOpen(true)}
-                  className="text-green-600 dark:text-green-400 font-medium flex items-center hover:text-green-800 dark:hover:text-green-300 group"
+                  className="font-medium flex items-center hover:opacity-80 group"
+                  style={{ color: "#598216" }}
                 >
                   Try it now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -588,18 +651,29 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-green-100 dark:border-green-900 transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-              <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 w-20 h-20 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500">
-                <Database className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <div
+              className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group flex-shrink-0 w-full md:w-96"
+              style={{ borderWidth: "1px", borderColor: "rgba(89, 130, 22, 0.2)" }}
+            >
+              <div
+                className="rounded-full w-24 h-24 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500"
+                style={{
+                  background: "linear-gradient(to bottom right, rgba(89, 130, 22, 0.2), rgba(89, 130, 22, 0.3))",
+                }}
+              >
+                <Database className="h-12 w-12" style={{ color: "#598216" }} />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-green-800 dark:text-green-300 text-center">AI Analysis</h3>
+              <h3 className="text-xl font-bold mb-4 text-center" style={{ color: "#598216" }}>
+                AI Analysis
+              </h3>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 Our PyTorch model analyzes your inputs against historical Rwanda maize data.
               </p>
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => scrollToSection("visualization")}
-                  className="text-green-600 dark:text-green-400 font-medium flex items-center hover:text-green-800 dark:hover:text-green-300 group"
+                  className="font-medium flex items-center hover:opacity-80 group"
+                  style={{ color: "#598216" }}
                 >
                   View analytics
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -607,18 +681,29 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-green-100 dark:border-green-900 transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-              <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 w-20 h-20 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500">
-                <Leaf className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <div
+              className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group flex-shrink-0 w-full md:w-96"
+              style={{ borderWidth: "1px", borderColor: "rgba(89, 130, 22, 0.2)" }}
+            >
+              <div
+                className="rounded-full w-24 h-24 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-500"
+                style={{
+                  background: "linear-gradient(to bottom right, rgba(89, 130, 22, 0.2), rgba(89, 130, 22, 0.3))",
+                }}
+              >
+                <Leaf className="h-12 w-12" style={{ color: "#598216" }} />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-green-800 dark:text-green-300 text-center">Get Predictions</h3>
+              <h3 className="text-xl font-bold mb-4 text-center" style={{ color: "#598216" }}>
+                Get Predictions
+              </h3>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 Receive maize yield predictions in tons/ha and a category (Low, Medium, High).
               </p>
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => setIsFormModalOpen(true)}
-                  className="text-green-600 dark:text-green-400 font-medium flex items-center hover:text-green-800 dark:hover:text-green-300 group"
+                  className="font-medium flex items-center hover:opacity-80 group"
+                  style={{ color: "#598216" }}
                 >
                   Get started
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -629,20 +714,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Visualization Dashboard Section */}
+      {/* Visualization Section */}
       <section
         id="visualization"
         ref={visualizationRef}
-        className="py-24 bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800"
+        className="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
       >
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center text-center mb-16">
             <div className="relative mb-6">
-              <h2 className="text-3xl md:text-5xl font-bold text-green-900 dark:text-green-400 relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold relative z-10" style={{ color: "#598216" }}>
                 Visualization Dashboard
               </h2>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-green-500 rounded-full blur-md opacity-50"></div>
+              <div
+                className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 rounded-full"
+                style={{ background: "linear-gradient(to right, #598216, #6a9a1a)" }}
+              ></div>
+              <div
+                className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 rounded-full blur-md opacity-50"
+                style={{ backgroundColor: "#598216" }}
+              ></div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl text-lg">
               Visualize maize yield trends and model performance to optimize farming decisions in Rwanda.
@@ -651,89 +742,6 @@ export default function Home() {
           <VisualizationSection retrainResult={retrainResult} />
         </div>
       </section>
-
-      {/* Upload Section */}
-      {/* <section id="upload" ref={uploadRef} className="py-24 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center text-center mb-16">
-            <div className="relative mb-6">
-              <h2 className="text-3xl md:text-5xl font-bold text-green-900 dark:text-green-400 relative z-10">
-                Upload New Data
-              </h2>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1.5 bg-green-500 rounded-full blur-md opacity-50"></div>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl text-lg">
-              Upload a CSV file with new maize yield data to retrain the model and improve predictions.
-            </p>
-          </div>
-
-          <form onSubmit={handleUpload} className="max-w-md mx-auto">
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-                isDragging ? "border-green-500 bg-green-50 dark:bg-green-900/30" : "border-gray-300 dark:border-gray-700"
-              }`}
-            >
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
-              />
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer flex flex-col items-center gap-2"
-              >
-                <FileUp className="h-12 w-12 text-green-600 dark:text-green-400" />
-                <span className="text-gray-600 dark:text-gray-300">
-                  {file ? file.name : "Drag & drop a CSV file or click to browse"}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Only CSV files are supported
-                </span>
-              </label>
-            </div>
-            {error && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p>{error}</p>
-                </div>
-              </div>
-            )}
-            {uploadMessage && (
-              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-sm">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p>{uploadMessage}</p>
-                </div>
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={isUploading || !file}
-              className={`mt-6 w-full px-5 py-3 text-sm rounded-lg transition-all duration-300 ${
-                isUploading || !file
-                  ? "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-green-500/30"
-              }`}
-            >
-              {isUploading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Uploading...
-                </span>
-              ) : (
-                "Upload and Retrain"
-              )}
-            </button>
-          </form>
-        </div>
-      </section> */}
 
       {/* Form Modal */}
       {isFormModalOpen && (
@@ -749,10 +757,7 @@ export default function Home() {
 
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  htmlFor="country-input"
-                  className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1"
-                >
+                <label htmlFor="country-input" className="block text-sm font-medium mb-1" style={{ color: "#598216" }}>
                   Country
                 </label>
                 <input
@@ -761,15 +766,13 @@ export default function Home() {
                   name="country"
                   value={formData.country}
                   disabled
-                  className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 cursor-not-allowed"
+                  className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 cursor-not-allowed"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
                   placeholder="Rwanda"
                 />
               </div>
               <div>
-                <label
-                  htmlFor="crop-input"
-                  className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1"
-                >
+                <label htmlFor="crop-input" className="block text-sm font-medium mb-1" style={{ color: "#598216" }}>
                   Crop
                 </label>
                 <input
@@ -778,15 +781,13 @@ export default function Home() {
                   name="crop"
                   value={formData.crop}
                   disabled
-                  className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 cursor-not-allowed"
+                  className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 cursor-not-allowed"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
                   placeholder="Maize"
                 />
               </div>
               <div>
-                <label
-                  htmlFor="year-input"
-                  className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1"
-                >
+                <label htmlFor="year-input" className="block text-sm font-medium mb-1" style={{ color: "#598216" }}>
                   Year
                 </label>
                 <input
@@ -795,7 +796,10 @@ export default function Home() {
                   name="year"
                   value={formData.year}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "#598216")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(89, 130, 22, 0.3)")}
                   placeholder="e.g., 2025"
                   min="1985"
                   max="2028"
@@ -805,7 +809,8 @@ export default function Home() {
               <div>
                 <label
                   htmlFor="pesticides-input"
-                  className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: "#598216" }}
                 >
                   Pesticides Used (tonnes)
                 </label>
@@ -815,19 +820,18 @@ export default function Home() {
                   name="pesticides_tonnes"
                   value={formData.pesticides_tonnes}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "#598216")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(89, 130, 22, 0.3)")}
                   placeholder="e.g., 200"
                   min="97"
                   max="3000"
-                  
                   required
                 />
               </div>
               <div>
-                <label
-                  htmlFor="temp-input"
-                  className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1"
-                >
+                <label htmlFor="temp-input" className="block text-sm font-medium mb-1" style={{ color: "#598216" }}>
                   Average Temperature (°C)
                 </label>
                 <input
@@ -836,7 +840,10 @@ export default function Home() {
                   name="avg_temp"
                   value={formData.avg_temp}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-green-300 dark:border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "#598216")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(89, 130, 22, 0.3)")}
                   placeholder="e.g., 19.5"
                   min="19"
                   max="20.29"
@@ -856,13 +863,17 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setIsFormModalOpen(false)}
-                  className="order-2 sm:order-1 px-5 py-3 text-sm text-green-800 dark:text-green-300 border border-green-300 dark:border-green-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
+                  className="order-2 sm:order-1 px-5 py-3 text-sm rounded-lg transition-colors flex items-center"
+                  style={{ color: "#598216", borderColor: "rgba(89, 130, 22, 0.3)", backgroundColor: "transparent" }}
+                  onMouseEnter={(e) => (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.1)")}
+                  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="order-1 sm:order-2 px-5 py-3 text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-colors shadow-md hover:shadow-green-500/30"
+                  style={{ background: "linear-gradient(to right, #598216, #4a6f12)" }}
+                  className="order-1 sm:order-2 px-5 py-3 text-sm text-white rounded-lg transition-opacity shadow-md hover:opacity-90"
                 >
                   Predict Yield
                 </button>
@@ -873,7 +884,7 @@ export default function Home() {
       )}
 
       {/* Results Modal */}
-      {isResultsModalOpen && (
+      {isResultsModalOpen && prediction && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in overflow-y-auto py-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 w-full max-w-md mx-auto relative shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto">
             <button
@@ -883,49 +894,84 @@ export default function Home() {
               <X className="h-6 w-6" />
             </button>
             <div className="mb-6 text-center">
-              <div className="h-20 w-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto mb-4">
-                <CheckCircle size={32} />
+              <div
+                className="h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{
+                  background: "linear-gradient(to bottom right, rgba(89, 130, 22, 0.2), rgba(89, 130, 22, 0.3))",
+                }}
+              >
+                <CheckCircle size={32} style={{ color: "#598216" }} />
               </div>
-              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">Maize Yield Prediction</h2>
+              <h2 className="text-2xl font-bold" style={{ color: "#598216" }}>
+                Maize Yield Prediction
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 mt-2">Based on your input data for {formData.country}</p>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-6 mb-6">
+            <div className="rounded-xl p-6 mb-6" style={{ backgroundColor: "rgba(89, 130, 22, 0.1)" }}>
               <div className="space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
+                <div
+                  className="flex items-center gap-3 pb-3 border-b"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.2)" }}
+                >
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Country</p>
-                    <p className="text-green-900 dark:text-green-300 font-medium">{formData.country}</p>
+                    <p className="text-xs uppercase font-semibold" style={{ color: "#598216" }}>
+                      Country
+                    </p>
+                    <p className="font-medium" style={{ color: "#598216" }}>
+                      {formData.country}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
+                <div
+                  className="flex items-center gap-3 pb-3 border-b"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.2)" }}
+                >
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Crop</p>
-                    <p className="text-green-900 dark:text-green-300 font-medium">{formData.crop}</p>
+                    <p className="text-xs uppercase font-semibold" style={{ color: "#598216" }}>
+                      Crop
+                    </p>
+                    <p className="font-medium" style={{ color: "#598216" }}>
+                      {formData.crop}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
+                <div
+                  className="flex items-center gap-3 pb-3 border-b"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.2)" }}
+                >
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Year</p>
-                    <p className="text-green-900 dark:text-green-300 font-medium">{formData.year}</p>
+                    <p className="text-xs uppercase font-semibold" style={{ color: "#598216" }}>
+                      Year
+                    </p>
+                    <p className="font-medium" style={{ color: "#598216" }}>
+                      {formData.year}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
+                <div
+                  className="flex items-center gap-3 pb-3 border-b"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.2)" }}
+                >
                   <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Pesticides Used</p>
-                    <p className="text-green-900 dark:text-green-300 font-medium">{formData.pesticides_tonnes} tonnes</p>
+                    <p className="text-xs uppercase font-semibold" style={{ color: "#598216" }}>
+                      Pesticides Used
+                    </p>
+                    <p className="font-medium" style={{ color: "#598216" }}>
+                      {formData.pesticides_tonnes} tonnes
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 pb-3 border-b border-green-200 dark:border-green-800">
-                  <div>
-                    <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold">Average Temperature</p>
-                    <p className="text-green-900 dark:text-green-300 font-medium">{formData.avg_temp}°C</p>
-                  </div>
-                </div>
-                <div className="mt-6 bg-white dark:bg-gray-700 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                  <p className="text-xs text-green-700 dark:text-green-400 uppercase font-semibold mb-1">Predicted Yield</p>
+                <div
+                  className="mt-6 bg-white dark:bg-gray-700 rounded-lg p-4 border"
+                  style={{ borderColor: "rgba(89, 130, 22, 0.2)" }}
+                >
+                  <p className="text-xs uppercase font-semibold mb-1" style={{ color: "#598216" }}>
+                    Predicted Yield
+                  </p>
                   <div className="flex items-center gap-2">
-                    {/* <span className="text-green-600 dark:text-green-400 text-2xl">📊</span> */}
-                    <p className="text-green-900 dark:text-green-300 font-bold text-xl">{prediction.value} tons/ha ({prediction.category})</p>
+                    <p className="font-bold text-xl" style={{ color: "#598216" }}>
+                      {prediction.value} tons/ha ({prediction.category})
+                    </p>
                   </div>
                 </div>
                 {prediction.warning && (
@@ -941,7 +987,10 @@ export default function Home() {
             <div className="flex justify-between">
               <button
                 onClick={handleBackToForm}
-                className="px-5 py-3 text-sm bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900 transition-colors flex items-center"
+                className="px-5 py-3 text-sm rounded-lg transition-colors flex items-center"
+                style={{ backgroundColor: "rgba(89, 130, 22, 0.1)", color: "#598216" }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.2)")}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = "rgba(89, 130, 22, 0.1)")}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -956,7 +1005,8 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setIsResultsModalOpen(false)}
-                className="px-5 py-3 text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-colors shadow-md hover:shadow-green-500/30"
+                style={{ background: "linear-gradient(to right, #598216, #4a6f12)" }}
+                className="px-5 py-3 text-sm text-white rounded-lg transition-opacity shadow-md hover:opacity-90"
               >
                 Done
               </button>
@@ -965,119 +1015,60 @@ export default function Home() {
         </div>
       )}
 
-      {/* Retrain Model Modal */}
-      {/* {isRetrainModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md relative shadow-2xl animate-scale-in">
+      {/* Login Modal */}
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="relative w-full max-w-6xl animate-scale-in">
             <button
-              onClick={() => setIsRetrainModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              disabled={isRetraining}
+              onClick={() => setIsLoginModalOpen(false)}
+              className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg"
+              aria-label="Close login modal"
             >
               <X className="h-6 w-6" />
             </button>
-            <div className="mb-6 text-center">
-              <div className="h-20 w-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto mb-4">
-                {isRetraining ? <Loader2 size={32} className="animate-spin" /> : <RefreshCw size={32} />}
-              </div>
-              <h2 className="text-2xl font-bold text-green-900 dark:text-green-300">
-                {isRetraining ? "Retraining Model..." : "Retrain Model"}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
-                {isRetraining ? "Please wait while we process your request" : "Choose your retraining method"}
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div
-                onClick={!isRetraining ? handleRetrainWithExistingData : undefined}
-                className={`border-2 border-green-200 dark:border-green-800 rounded-xl p-5 ${
-                  isRetraining
-                    ? "opacity-70 cursor-not-allowed"
-                    : "cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
-                } transition-all duration-200 group`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 p-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    {isRetraining ? (
-                      <Loader2 className="h-6 w-6 text-green-600 dark:text-green-400 animate-spin" />
-                    ) : (
-                      <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-green-900 dark:text-green-300 text-lg">Use Existing Data</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      {isRetraining
-                        ? "Retraining in progress..."
-                        : "Retrain the model with existing Rwanda maize data"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                onClick={
-                  !isRetraining
-                    ? () => {
-                        setIsRetrainModalOpen(false)
-                        scrollToSection("upload")
-                      }
-                    : undefined
-                }
-                className={`border-2 border-green-200 dark:border-green-800 rounded-xl p-5 ${
-                  isRetraining
-                    ? "opacity-70 cursor-not-allowed"
-                    : "cursor-pointer hover:border-green-500 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
-                } transition-all duration-200 group`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 p-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <FileUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-green-900 dark:text-green-300 text-lg">Upload New Data</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Upload a CSV file to retrain the model with new data
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-gray-600 dark:text-gray-300 text-sm">
-              <p className="flex items-start gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>
-                  {isRetraining
-                    ? "Retraining is in progress. Please don't close this window."
-                    : "Retraining may take a few minutes. You'll be notified when complete."}
-                </span>
-              </p>
-            </div>
+            <LoginForm
+              onSwitchToSignup={() => {
+                setIsLoginModalOpen(false)
+                setIsSignupModalOpen(true)
+              }}
+            />
           </div>
         </div>
-      )} */}
+      )}
+
+      {/* Signup Modal */}
+      {isSignupModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="relative w-full max-w-6xl animate-scale-in">
+            <button
+              onClick={() => setIsSignupModalOpen(false)}
+              className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg"
+              aria-label="Close signup modal"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <SignupForm
+              onSwitchToLogin={() => {
+                setIsSignupModalOpen(false)
+                setIsLoginModalOpen(true)
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-green-950 to-green-900 dark:from-gray-900 dark:to-gray-950 text-white py-16">
+      <footer className="text-white py-16" style={{ background: "linear-gradient(to right, #2d4010, #3d5515)" }}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 rounded-full blur-md opacity-20"></div>
-                  <Leaf className="h-7 w-7 relative text-white" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                  <img
+                    src="/images/smartgwizalogo.png"
+                    alt="SmartGwiza Logo"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <span className="text-xl font-bold">SmartGwiza</span>
               </div>
@@ -1090,7 +1081,10 @@ export default function Home() {
                     <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                   </svg>
                 </a>
-                <a href="https://github.com/lilika67/SmartGwizaS" className="text-gray-300 hover:text-white transition-colors">
+                <a
+                  href="https://github.com/lilika67/SmartGwizaS"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                   </svg>
@@ -1102,6 +1096,7 @@ export default function Home() {
                 </a>
               </div>
             </div>
+
             <div>
               <h3 className="font-bold text-lg mb-4">Product</h3>
               <ul className="space-y-3">
@@ -1121,11 +1116,78 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-green-900 dark:border-gray-800 mt-12 pt-8 text-center text-gray-300">
+
+          <div
+            className="border-t mt-12 pt-8 text-center text-gray-300"
+            style={{ borderColor: "rgba(89, 130, 22, 0.3)" }}
+          >
             <p>© {new Date().getFullYear()} SmartGwiza. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes float-slow {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+        .animate-float-slow {
+          animation: float-slow 6s ease-in-out infinite;
+        }
+        .animation-delay-1000 {
+          animation-delay: 1s;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-3000 {
+          animation-delay: 3s;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-out both;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-scale-in {
+          animation: scaleIn 0.3s ease-out both;
+        }
+        @keyframes scaleIn {
+          from { transform: scale(0.8); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .animate-slide-down {
+          animation: slideDown 0.5s ease-out both;
+        }
+        @keyframes slideDown {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
     </main>
   )
 }

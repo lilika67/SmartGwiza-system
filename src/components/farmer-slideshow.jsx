@@ -1,45 +1,43 @@
 "use client"
-import { useEffect, useRef } from "react"
-import Image from "next/image"
-
-const heroImage = {
-  src: "/images/maize.jpg",
-  alt: "Farmer inspecting crops in a wheat field at sunset",
-}
+import { useState, useEffect } from "react"
 
 export default function FarmerSlideshow() {
-  const imageRef = useRef(null)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
-  // Parallax effect on scroll
+  const slides = ["/images/maize.jpg", "/images/farm4.jpg", "/images/farme.jpg"]
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (!imageRef.current) return
-      const scrollY = window.scrollY
-      const translateY = scrollY * 0.3 
-      imageRef.current.style.transform = `translate3d(0, ${translateY}px, 0)`
-    }
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 5000)
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    return () => clearInterval(interval)
+  }, [slides.length])
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      {/* Gradient overlay for better text readability */}
-      <div className="absolute inset-0   z-10"></div>
+    <div className="absolute inset-0 w-full h-full">
+      {slides.map((slide, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+        >
+          <img src={slide || "/placeholder.svg"} alt={`Farmer ${index + 1}`} className="w-full h-full object-cover" />
+        </div>
+      ))}
 
-      {/* Hero Image with Parallax */}
-      <div ref={imageRef} className="h-[120%] w-full absolute top-0 left-0">
-        <Image
-          src={heroImage.src || "/placeholder.svg"}
-          alt={heroImage.alt}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+      {/* Slideshow indicators */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide ? "bg-white w-8" : "bg-white/50 hover:bg-white/75"
+              }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
     </div>
   )
 }
-

@@ -1,18 +1,25 @@
-import { Inter } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const geist = Geist({ subsets: ["latin"] })
+const geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "SmartGwiza - Predict Your Crop Yield with AI",
-  description: "AI-powered crop yield prediction app for farmers",
+  title: "SmartGwiza - AI-Pcccowered Maize Yield Prediction",
+  description:
+    "SmartGwiza helps Rwandan farmers predict maize yields using AI technology, access expert knowledge, and improve farming practices.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/smartgwizalogo.png",
+  },
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+      </body>
     </html>
   )
 }
-
